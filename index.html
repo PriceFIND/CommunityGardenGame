@@ -12,20 +12,11 @@
   <body onload="startGame()">
     <script>
       var myBackground;
-      var elem = document.getElementById('myCanvas'),
-          elemLeft = elem.offsetLeft,
-          elemTop = elem.offsetTop,
-          context = elem.getContext('2d'),
-          elements = [];
-
-      elem.addEventListener('click', function(event) {
-          var x = event.pageX - elemLeft,
-              y = event.pageY - elemTop;
-          console.log(x,y);
-      });
+      var cabbage;
 
       function startGame(){
           myBackground = new component(650, 447,"images/background.jpg",0,0,"image");
+          cabbage = new component(50,50,"images/cabbage.png",0,0,"image");
           myGameArea.start();
       }
 
@@ -68,10 +59,27 @@
         }
       }
 
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
       function updateGameArea(){
         myGameArea.clear();
         myBackground.update();
+        myGameArea.canvas.addEventListener('click', function(evt) {
+          var mousePos = getMousePos(myGameArea.canvas,evt);
+          console.log(mousePos.x, mousePos.y); //tell me where the mouse is
+          //so now that i know where the mouse is... i can make a cabbage show up if i click...
+          cabbage = new component(50,50,"images/cabbage.png",mousePos.x,mousePos.y,"image");
+
+        }, false);
+        cabbage.update();
       }
+
+
     </script>
   </body>
 </html>
