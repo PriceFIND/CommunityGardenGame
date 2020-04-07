@@ -8,6 +8,8 @@
         background-color: #f1f1f1;
       }
     </style>
+    <title></title>
+
   </head>
   <body onload="startGame()">
     <script>
@@ -23,7 +25,7 @@
       var myGameArea = {
           canvas : document.createElement("canvas"),
           start : function(){
-            this.canvas.width = 650;
+            this.canvas.width = 650; //change me
             this.canvas.height = 447;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -73,7 +75,7 @@
           var mousePos = getMousePos(myGameArea.canvas,evt);
           console.log(mousePos.x, mousePos.y); //tell me where the mouse is
           //so now that i know where the mouse is... i can make a cabbage show up if i click...
-          cabbage = new component(50,50,"images/cabbage.png",mousePos.x,mousePos.y,"image");
+          cabbage = new component(50,50,"images/cabbage.png",mousePos.x-(cabbage.width/2),mousePos.y-(cabbage.height/2),"image"); //okay going to change the mousePos.x and mousePos.y to get the cabbage centered...
 
         }, false);
         cabbage.update();

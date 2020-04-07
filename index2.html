@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CommunityGardenGame</title>
+  </head>
+
+  <body onload="startGame()">
+    <canvas id="gameScreen" width="650" height="450"></canvas>
+
+  </body>
+  <script>
+    //this is going to help refresh the screen but it will pause if the screen isnt active.
+    var animate = window.requestAnimationFrame ||
+                  window.webkitRequestAnimationFrame ||
+                  window.mozRequestAnimationFrame ||
+                  function(callback) { window.setTimeout(callback, 1000/60) };
+
+    //setup the canvas stuff
+    var cvs = document.getElementById('gameScreen');
+    var ctx = cvs.getContext('2d');
+
+    //set up the graphic variables
+    var background = new Image();
+    background.src = "images/background.jpg";
+    var cabbage = new Image();
+    cabbage.src = "images/cabbage.png"
+    var babySize = 10;
+
+
+    //setup cabbage array, let's us have lots of cabbages on the gameScreen
+    var cab = [];
+
+    function drawCabbages(){
+      for(var i=0; i<cab.length; i++){
+        if (cab[i].size > babySize*5){
+          cab.splice(i,1);
+          i--; //so we dont skip things
+        }
+        else{
+          ctx.drawImage(cabbage, cab[i].x, cab[i].y, cab[i].size, cab[i].size);
+        }
+      }
+    }
+
+    document.addEventListener("click", clickHandler);
+
+    function clickHandler(e){
+      //console.log(e);
+      //check to see if we clicked a cabbage
+      var clickedACabbage = false;
+      //console.log(e.layerX, e.layerY);
+      for(var i=0; i<cab.length; i++){ //check each cabbage
+        if ((cab[i].x < e.layerX) && (e.layerX < (cab[i].x+ cab[i].size)) &&
+            (cab[i].y < e.layerY) && (e.layerY < (cab[i].y+ cab[i].size)) ){
+              //console.log("cabbage", cab[i]);
+              clickedACabbage = true;
+              centerX = cab[i].x + cab[i].size/2; //i want to keep the cabbage centered
+              centerY = cab[i].y + cab[i].size/2;
+              cab[i].size *= 2; //if we click a cabbage size up
+              cab[i].x = centerX - cab[i].size/2; //to keep the cabbage centered.
+              cab[i].y = centerY - cab[i].size/2;
+              break; //we dont need to keep checking
+              //centering the cabbage is sort of a non issue once we force the locations of change the art entirely, but it looks good right now. and we can change it all later.
+            }
+      }
+      if(!clickedACabbage){
+        cab.push({
+          x: e.layerX-(babySize/2), //to center in on the mouse click
+          y: e.layerY-(babySize/2),
+          size:babySize
+        });
+        //console.log(cab[cab.length-1]);
+      }
+    }
+
+    function startGame(){
+      animate(frame);
+    }
+
+    function frame(){
+      ctx.drawImage(background, 0, 0, cvs.width, cvs.height); //draw the background
+      drawCabbages();
+      animate(frame);
+    }
+
+  </script>
+<html>
