@@ -26,13 +26,36 @@
     cabbage.src = "images/cabbage.png"
     var babySize = 10;
 
+    var row1 = new Image();
+    row1.src = "images/empty.gif";
+    var row2 = new Image();
+    row2.src = "images/empty.gif";
+
+    var seedCab = new Image();
+    var seedTom = new Image();
+    var seedCar = new Image();
+    seedCab.src = "images/choiceCab.gif"
+    seedTom.src = "images/choiceTom.gif"
+    seedCar.src = "images/choiceCar.gif"
+    var drawSeed = false;
+    var selectedRow;
 
     //setup cabbage array, let's us have lots of cabbages on the gameScreen
     var cab = [];
 
     function drawCabbages(){
       for(var i=0; i<cab.length; i++){
-        if (cab[i].size > babySize*5){
+        var currentTime = performance.now();
+        var timeDiff = currentTime - cab[i].age;
+        timeDiff /= 1000; //timeDiff in seconds with a bunch of extra past the decimal
+        //console.log(Math.floor(timeDiff%3));
+
+        if ((timeDiff%3) > 2){
+            growPlant(cab[i]);
+            cab[i].age = performance.now();
+        }
+
+        if (cab[i].size > babySize*5){ //if it's too big bye bye cabbage
           cab.splice(i,1);
           i--; //so we dont skip things
         }
@@ -44,34 +67,98 @@
 
     document.addEventListener("click", clickHandler);
 
+    function plantCabbage(row){
+      row.src = "images/baby.gif";
+      setTimeout(function(){
+        row.src = "images/teen.gif";
+        setTimeout(function(){
+          row.src = "images/adult.gif";
+          setTimeout(function(){
+            row.src = "images/empty.gif";
+          }, 3000); //this is a very silly thing to do
+        }, 3000); // i am nesting setTimeout functions
+      }, 3000); // this will grow automaticaly
+    }
+
+    function growPlant(plant){ //should take a plant and make it grow
+      var centerX = plant.x + plant.size/2; //to help keep center
+      var centerY = plant.y + plant.size/2;
+      plant.size *= 2;
+      plant.x = centerX - plant.size/2; //to keep center
+      plant.y = centerY - plant.size/2;
+    }
+
     function clickHandler(e){
       //console.log(e);
-      //check to see if we clicked a cabbage
-      var clickedACabbage = false;
       //console.log(e.layerX, e.layerY);
-      for(var i=0; i<cab.length; i++){ //check each cabbage
-        if ((cab[i].x < e.layerX) && (e.layerX < (cab[i].x+ cab[i].size)) &&
-            (cab[i].y < e.layerY) && (e.layerY < (cab[i].y+ cab[i].size)) ){
-              //console.log("cabbage", cab[i]);
-              clickedACabbage = true;
-              centerX = cab[i].x + cab[i].size/2; //i want to keep the cabbage centered
-              centerY = cab[i].y + cab[i].size/2;
-              cab[i].size *= 2; //if we click a cabbage size up
-              cab[i].x = centerX - cab[i].size/2; //to keep the cabbage centered.
-              cab[i].y = centerY - cab[i].size/2;
-              break; //we dont need to keep checking
-              //centering the cabbage is sort of a non issue once we force the locations of change the art entirely, but it looks good right now. and we can change it all later.
+      if (drawSeed){
+        //check to see if they clicked on a good option
+        //cabbge seed
+        if ((seedX <= e.layerX) && (e.layerX <= seedX+20) &&
+            (seedY <= e.layerY) && (e.layerY <= seedY+20)){
+              plantCabbage(selectedRow);
             }
+        //tomato seed
+        if ((seedX +30 <= e.layerX) && (e.layerX <= seedX+50) &&
+            (seedY <= e.layerY) && (e.layerY <= seedY+20)){
+              plantCabbage(selectedRow); //should make a plantTomato function
+            }
+        //carrot seed
+        //lots of magic numbers
+        if ((seedX +60 <= e.layerX) && (e.layerX <= seedX+80) &&
+            (seedY <= e.layerY) && (e.layerY <= seedY+20)){
+              plantCabbage(selectedRow); //should make a plantCarrot function
+            }
+        drawSeed = false;
       }
-      if(!clickedACabbage){
-        cab.push({
-          x: e.layerX-(babySize/2), //to center in on the mouse click
-          y: e.layerY-(babySize/2),
-          size:babySize
-        });
-        //console.log(cab[cab.length-1]);
+      //check to see if we clicked a sign
+      else if ((130 <= e.layerX) && (e.layerX <= 160) &&
+          (295 <= e.layerY) && (e.layerY <= 320)){
+            // i clicked the row1 sign i should have options of what to plant
+            drawSeed = true;
+            seedX = 100;
+            seedY = 330;
+            selectedRow = row1;
+
+          }
+
+      else if ((230 <= e.layerX) && (e.layerX <= 260) &&
+              (295 <= e.layerY) && (e.layerY <= 320)){
+                // i clicked the row1 sign i should have options of what to plant
+                drawSeed = true;
+                seedX = 200;
+                seedY = 330;
+                selectedRow = row2;
+
+              }
+      //check to see if we clicked a cabbage,,, we probably dont need this any more?
+      else{
+        var clickedACabbage = false;
+        for(var i=0; i<cab.length; i++){ //check each cabbage
+          if ((cab[i].x < e.layerX) && (e.layerX < (cab[i].x+ cab[i].size)) &&
+              (cab[i].y < e.layerY) && (e.layerY < (cab[i].y+ cab[i].size)) ){
+                //console.log("cabbage", cab[i]);
+                clickedACabbage = true; // yep i clicked a cabbage
+
+                growPlant(cab[i]);
+
+                break; //we dont need to keep checking
+                //centering the cabbage is sort of a non issue once we force the locations of change the art entirely, but it looks good right now. and we can change it all later.
+              }
+        }
+        if(!clickedACabbage){
+          cab.push({
+            x: e.layerX-(babySize/2), //to center in on the mouse click
+            y: e.layerY-(babySize/2),
+            size:babySize,
+            age: performance.now()
+          });
+          //console.log(cab[cab.length-1]);
+        }
       }
     }
+
+
 
     function startGame(){
       animate(frame);
@@ -79,6 +166,13 @@
 
     function frame(){
       ctx.drawImage(background, 0, 0, cvs.width, cvs.height); //draw the background
+      ctx.drawImage(row1,100,50,200,300); //this really ought to be handled differently.
+      ctx.drawImage(row2,200,50,200,300); //you can't click this one... also we want to choose what to plant
+      if(drawSeed){
+        ctx.drawImage(seedCab,seedX,seedY,20,20);
+        ctx.drawImage(seedTom,seedX+30,seedY,20,20);
+        ctx.drawImage(seedCar,seedX+60,seedY,20,20); //lots of magic numbers
+      }
       drawCabbages();
       animate(frame);
     }
